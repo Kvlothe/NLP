@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.model_selection import train_test_split
-import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.models import Sequential
@@ -15,6 +14,10 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import string
 import re
+# import scipy
+
+# print(np.__version__)
+# print(scipy.__version__)
 
 
 # Function for detecting non-english words and symbols
@@ -131,11 +134,14 @@ sequences = tokenizer.texts_to_sequences(df['sentence'])
 # Pad sequences to ensure uniform length
 X_padded = pad_sequences(sequences, maxlen=max_length, padding='post')
 print(X_padded[:5])
+clean_df = pd.DataFrame(X_padded)
+clean_df.to_csv('preped_data.csv', index=False)
 
 # Convert 'sentiment' to numerical labels
 # 'positive' -> 1, 'negative' -> 0
 df['sentiment_label'] = df['sentiment'].apply(lambda x: 1 if x == 'positive' else 0)
 y = df['sentiment_label'].values
+df.to_csv("prepared_data.csv")
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X_padded, y, test_size=0.2, random_state=42)
@@ -170,6 +176,8 @@ history = model.fit(X_train, y_train,
 loss, accuracy = model.evaluate(X_test, y_test, verbose=2)
 print(f"Test accuracy: {accuracy}")
 
+model.summary()
+
 # Plot metrics to view Training and validation accuracy
 plt.plot(history.history['accuracy'], label='Training accuracy')
 plt.plot(history.history['val_accuracy'], label='Validation accuracy')
@@ -186,4 +194,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend()
 plt.show()
+
+model.save('classification.h5')
 
